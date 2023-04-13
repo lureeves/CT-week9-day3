@@ -31,29 +31,30 @@ const register = {
     }
 }
 
+
 const login = {
     type: GraphQLString,
-    description: 'Log in a user',
-    args: { 
+    description: 'Authenticate a user',
+    args: {
         email: { type: GraphQLString },
         password: { type: GraphQLString }
     },
     async resolve(parent, args){
-      
-        const user = await User.findOne({ email: args.email }).exec();
-        if (!user){
-            throw new Error("Error with username");
-        }
-
-        const passwordFound = await bcrypt.compare(password, user.password);
-
-        if (!passwordFound){
-            throw new Error("Enter correct password");
-        }
-
+        // Get the user form the database based on email
+        const user = await User.findOne({ email: args.email });
+        // Get the hashed password from the user OR set it to an empty string if no user
+        const hashedPassword = user?.password || '';
+        // Check the password
+        const correctPassword = await bcrypt.compare(args.password, hashedPassword);
+        // console.log(user, correctPassword)
+        // If no user with email or the password is incorrect
+        if (!user || !correctPassword){
+            throw new Error('Invalid Credentials');
+        };
+        // credentail our user (create a token)
         const token = createJWT(user);
 
-        return token
+        return token;
     }
 };
 

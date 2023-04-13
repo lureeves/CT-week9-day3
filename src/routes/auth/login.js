@@ -1,17 +1,10 @@
 const axios = require('axios');
 
 module.exports = async (req, res) => {
-    // console.log(req.body);
-    // First check if that passwords match
-    res.send("Post Auth Router Login");
-
     try {
         const mutation = `
             mutation ($email: String!, $password: String!){
-                login(
-                    email: $email
-                    password: $password
-                )
+                login(email: $email password: $password)
             }
         `
 
@@ -29,14 +22,13 @@ module.exports = async (req, res) => {
                     }
                 }
             )
-
-        const jwtoken = data.data.register;
+        // console.log(data)
+        const jwtoken = data.data.login;
         res.cookie('jwtoken', jwtoken, { httpOnly: true })
         res.redirect('/');
-
-        } catch(err) {
-            console.log(err)
-            res.redirect('/auth/register')
-        }
+    } catch(err) {
+        console.log(err)
+        res.redirect('/auth/login')
+    }
     
 }

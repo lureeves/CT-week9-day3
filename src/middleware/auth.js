@@ -9,6 +9,7 @@ const unprotectedRoutes = [
 const authenticate = (req, res, next) => {
     try{
         const token = req.cookies?.jwtoken || ""
+        console.log(token)
         const verified = jwt.verify(token, process.env.JWT_SECRET);
         req.verifiedUser = verified.user;
         next()

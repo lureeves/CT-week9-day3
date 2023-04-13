@@ -39,13 +39,13 @@ const login = {
         password: { type: GraphQLString }
     },
     async resolve(parent, args){
-        const {  email, password } = args;
+      
         const user = await User.findOne({ email: args.email }).exec();
         if (!user){
             throw new Error("Error with username");
         }
 
-        const passwordFound = await bcrypt.hash(password, user.password);
+        const passwordFound = await bcrypt.compare(password, user.password);
 
         if (!passwordFound){
             throw new Error("Enter correct password");
@@ -59,5 +59,6 @@ const login = {
 
 
 module.exports = {
-    register
+    register,
+    login
 }

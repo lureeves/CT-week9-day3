@@ -1,5 +1,5 @@
-const { GraphQLString } = require('graphql');
-const { User } = require('../models');
+const { GraphQLString, GraphQLID } = require('graphql');
+const { User, Quiz } = require('../models');
 const bcrypt = require('bcrypt');
 const { createJWT } = require('../util/auth');
 
@@ -46,7 +46,6 @@ const login = {
         const hashedPassword = user?.password || '';
         // Check the password
         const correctPassword = await bcrypt.compare(args.password, hashedPassword);
-        // console.log(user, correctPassword)
         // If no user with email or the password is incorrect
         if (!user || !correctPassword){
             throw new Error('Invalid Credentials');
@@ -59,7 +58,45 @@ const login = {
 };
 
 
+const createQuiz = {
+    type: GraphQLString,
+    description: "Creates a new quiz",
+    args: {
+        title: { type: GraphQLString },
+        description: { type: GraphQLString },
+        userId: { type: GraphQLID }
+    },
+    async resolve(parent, args){
+        // Generate a slug for our quiz based on the title
+        let slugify = args.title.toLowerCase().replace(/[^\w ]+/g, '').replace(/ +/g, '-');
+        // Add a random integer to the end of the slug, check that the slug does not already exist,
+        // if it does exist, generate a new slug number
+        let fullSlug;
+        let existingQuiz;
+        do {
+            let slugId = Math.floor(Math.random() * 1000);
+            fullSlug = `${slugify}-${slugId}`;
+
+            existingQuiz = await Quiz.findOne({ slug: fullSlug })
+        } while (existingQuiz);
+
+        // Create a new instance of Quiz
+        const quiz = new Quiz({
+            title: args.title,
+            slug: fullSlug,
+            description: args.description,
+            userId: args.userId
+        });
+
+        await quiz.save();
+
+        return quiz.slug
+    }
+}
+
+
 module.exports = {
     register,
-    login
+    login,
+    createQuiz
 }

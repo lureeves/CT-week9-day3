@@ -1,7 +1,7 @@
 // Import built-in graphql types
-const { GraphQLObjectType, GraphQLID, GraphQLString } = require('graphql');
-// Import User model
-const { User } = require('../models');
+const { GraphQLObjectType, GraphQLID, GraphQLString, GraphQLInputObjectType, GraphQLInt, GraphQLList } = require('graphql');
+// Import User, Question model
+const { User, Question, Quiz } = require('../models');
 
 
 // Define a custom User type
@@ -12,7 +12,13 @@ const UserType = new GraphQLObjectType(
         fields: () => ({
             id: { type: GraphQLID },
             username: { type: GraphQLString },
-            email: { type: GraphQLString }
+            email: { type: GraphQLString },
+            quizzes: {
+                type: new GraphQLList(QuizType),
+                resolve(parent, args){
+                    return Quiz.find( { userId: parent.id })
+                }
+            }
         })
     }
 );
@@ -34,14 +40,51 @@ const QuizType = new GraphQLObjectType(
                 resolve(parent, args){
                     return User.findById(parent.userId)
                 }
+            },
+            questions: {
+                type: new GraphQLList(QuestionType),
+                resolve(parent, args){
+                    return Question.find( { quizId: parent.id })
+                }
             }
         })
     }
 );
 
 
+// Create a Question Type (INPUT) for mutation of creating a quiz
+const QuestionInputType = new GraphQLInputObjectType(
+    {
+        name: 'QuestionInput',
+        description: 'Question Input Type',
+        fields: () => ({
+            title: { type: GraphQLString },
+            order: { type: GraphQLInt },
+            correctAnswer: { type: GraphQLString }
+        })
+    }
+);
+
+
+// Create a Question Type for queries
+const QuestionType = new GraphQLObjectType(
+    {
+        name: 'Question',
+        description: 'Question Type',
+        fields: () => ({
+            id: { type: GraphQLID },
+            title: { type: GraphQLString },
+            correctAnswer: { type: GraphQLString },
+            order: { type: GraphQLInt },
+            quizId: { type: GraphQLID }
+        })
+    }
+)
+
+
 // Export the custom types
 module.exports = {
     UserType,
-    QuizType
+    QuizType,
+    QuestionInputType
 };

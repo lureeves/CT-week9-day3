@@ -21,6 +21,11 @@ const userData = async (req, res, next) => {
                                 correctAnswer
                                 order
                             }
+                            submissions{
+                                score
+                                userId
+                            }
+                            avgScore
                         }
                     }
                 }

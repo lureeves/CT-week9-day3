@@ -8,7 +8,7 @@
                     <h1>Create A Quiz</h1>
                 </div>
             </div>
-            <form action="" method="post">
+            <form action="/quiz/create" method="post">
                 <div class="card mt-4">
                     <div class="card-body">
                         <div class="form-group">
@@ -41,13 +41,15 @@
     </div>
 </div>
 
+
+
 <script>
     const questionWrapper = document.getElementById('questionCards');
 
     let questions = [
         {
             text: '',
-            anser: ''
+            answer: ''
         },
     ];
 
@@ -60,11 +62,11 @@
                         <h2 class="mb-4 text-md">Question ${i+1}</h2>
                         <div class="form-group">
                             <label for="questionTitle${i}">Question Text</label>
-                            <input type="text" name="questionTitle${i}" class="form-control" value="${questions[i].text}">
+                            <input type="text" name="questionTitle${i}" class="form-control" required data-question="${i}" data-input="text" value="${questions[i].text}" onchange="inputChange(event)">
                         </div>
                         <div class="form-group">
                             <label for="questionAnswer${i}">Question Answer</label>
-                            <input type="text" name="questionAnswer${i}" class="form-control">
+                            <input type="text" name="questionAnswer${i}" class="form-control" required data-question="${i}" data-input="answer" value="${questions[i].answer}" onchange="inputChange(event)">
                         </div>
                         <button class="btn btn-danger" data-question="${i}" onclick="deleteQuestion(event)">Delete Question</button>
                     </div>
@@ -74,19 +76,25 @@
     }
 
     const addQuestion = e => {
-        questions.push({ test: '', answer: ''})
+        questions.push({ text: '', answer: ''})
         buildQuestions(questions, questionWrapper)
     }
 
     const deleteQuestion = e => {
         let questionIndex = e.target.dataset.question;
 
-        quesitons.splice(quesitonIndex, 1);
+        questions.splice(questionIndex, 1);
+        buildQuestions(questions, questionWrapper);
+    }
+
+    const inputChange = (e) => {
+        let questionIndex = e.target.dataset.question;
+        
+        questions[questionIndex][e.target.dataset.input] = e.target.value;
         buildQuestions(questions, questionWrapper);
     }
 
     buildQuestions(questions, questionWrapper);
 </script>
-
 
 <%- include('../partials/footer.ejs') %>
